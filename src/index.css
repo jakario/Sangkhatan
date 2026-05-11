@@ -151,11 +151,60 @@ header p {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
+  align-items: start;
 }
 
 @media (max-width: 992px) {
   .main-grid {
     grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .cart-sidebar {
+    position: relative !important;
+    top: 0 !important;
+    max-height: none !important;
+  }
+
+  .cart-items {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  header h1 {
+    font-size: 2rem;
+  }
+  
+  header p {
+    font-size: 0.9rem;
+  }
+
+  .items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+  
+  .set-card {
+    width: 120px;
+    padding: 1.5rem 1rem;
+  }
+  
+  .set-card h2 {
+    font-size: 1.8rem;
+  }
+  
+  .item-card {
+    padding: 1rem;
+  }
+  
+  .item-emoji {
+    font-size: 2.5rem;
   }
 }
 
