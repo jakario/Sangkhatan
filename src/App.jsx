@@ -303,7 +303,7 @@ function App() {
                      <img src="/qrcode.jpg" alt="QR Code" style={{ display: 'block', width: '200px' }} />
                   ===============================================
                 */}
-                <img src={`https://quickchart.io/qr?text=promptpay-dummy-${totalPrice}&size=200`} alt="QR Code" style={{ display: 'block' }} />
+                <img src="/qr.jpg" alt="QR Code" style={{ display: 'block', width: '200px', margin: '0 auto' }} />
               </div>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>(พื้นที่สำหรับแสดง QR Code ของจริง)</p>
               <button className="btn active" style={{ width: '100%' }} onClick={() => setShowQR(false)}>ปิดหน้าต่าง</button>
