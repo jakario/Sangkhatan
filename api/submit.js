@@ -23,6 +23,16 @@ export default async function handler(req, res) {
     let sheet = doc.sheetsByTitle['สังฆทาน'];
     if (!sheet) {
       sheet = await doc.addSheet({ title: 'สังฆทาน', headerValues: ['วันที่', 'รายการ', 'บริการด่วน', 'ราคารวม'] });
+    } else {
+      try {
+        await sheet.loadHeaderRow();
+      } catch (e) {
+        if (e.message.includes('No values in the header row')) {
+          await sheet.setHeaderRow(['วันที่', 'รายการ', 'บริการด่วน', 'ราคารวม']);
+        } else {
+          throw e;
+        }
+      }
     }
 
     const { items, express, total } = req.body;
