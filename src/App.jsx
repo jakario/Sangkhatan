@@ -12,6 +12,8 @@ function App() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [showQR, setShowQR] = useState(false);
   const [expressService, setExpressService] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     fetch('/db.json')
@@ -55,6 +57,36 @@ function App() {
 
   const removeItem = (id) => {
     setSelectedItems(selectedItems.filter((i) => i.id !== id));
+  };
+
+  const handlePaymentConfirm = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: selectedItems,
+          express: expressService,
+          total: itemsTotal + baseFee + (expressService ? 100 : 0) // ensuring total is calculated correctly in scope
+        })
+      });
+      if (res.ok) {
+        setSubmitSuccess(true);
+        setTimeout(() => {
+          setShowQR(false);
+          setSubmitSuccess(false);
+          setSelectedItems([]);
+          setTargetCount(null);
+          setExpressService(false);
+        }, 3000);
+      } else {
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่");
+      }
+    } catch(err) {
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่");
+    }
+    setIsSubmitting(false);
   };
 
   const filteredItems = useMemo(() => {
@@ -293,20 +325,41 @@ function App() {
               className="modal-content glass" 
               style={{ textAlign: 'center', padding: '2.5rem' }}
             >
-              <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>ชำระเงิน</h2>
-              <p style={{ margin: '1rem 0' }}>กรุณาสแกน QR Code เพื่อชำระเงิน<br/>จำนวน <strong style={{ color: 'var(--secondary)', fontSize: '1.2rem' }}>{totalPrice}</strong> บาท</p>
-              <div style={{ background: 'white', padding: '1rem', display: 'inline-block', borderRadius: '12px', margin: '1rem 0' }}>
-                {/* 
-                  ========== วิธีเปลี่ยน QR Code เป็นของจริง ==========
-                  1. นำรูปภาพ QR Code ของคุณ (เช่น qrcode.jpg) ไปใส่ไว้ในโฟลเดอร์ public/
-                  2. เปลี่ยนโค้ด <img src="..." /> ด้านล่างให้เป็นแบบนี้:
-                     <img src="/qrcode.jpg" alt="QR Code" style={{ display: 'block', width: '200px' }} />
-                  ===============================================
-                */}
-                <img src="/qr.jpg" alt="QR Code" style={{ display: 'block', width: '200px', margin: '0 auto' }} />
-              </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>(พื้นที่สำหรับแสดง QR Code ของจริง)</p>
-              <button className="btn active" style={{ width: '100%' }} onClick={() => setShowQR(false)}>ปิดหน้าต่าง</button>
+              {submitSuccess ? (
+                <div style={{ padding: '2rem', color: 'var(--success)' }}>
+                  <Check size={48} style={{ margin: '0 auto 1rem' }} />
+                  <h3 style={{ color: 'var(--success)', marginBottom: '0.5rem' }}>บันทึกข้อมูลสำเร็จ!</h3>
+                  <p style={{ color: 'var(--text-light)' }}>เราได้รับรายละเอียดการจัดชุดสังฆทานของคุณแล้ว</p>
+                </div>
+              ) : (
+                <>
+                  <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>ชำระเงิน</h2>
+                  <p style={{ margin: '1rem 0' }}>กรุณาสแกน QR Code เพื่อชำระเงิน<br/>จำนวน <strong style={{ color: 'var(--secondary)', fontSize: '1.2rem' }}>{totalPrice}</strong> บาท</p>
+                  <div style={{ background: 'white', padding: '1rem', display: 'inline-block', borderRadius: '12px', margin: '1rem 0' }}>
+                    {/* 
+                      ========== วิธีเปลี่ยน QR Code เป็นของจริง ==========
+                      1. นำรูปภาพ QR Code ของคุณ (เช่น qrcode.jpg) ไปใส่ไว้ในโฟลเดอร์ public/
+                      2. เปลี่ยนโค้ด <img src="..." /> ด้านล่างให้เป็นแบบนี้:
+                         <img src="/qrcode.jpg" alt="QR Code" style={{ display: 'block', width: '200px' }} />
+                      ===============================================
+                    */}
+                    <img src="/qr.jpg" alt="QR Code" style={{ display: 'block', width: '200px', margin: '0 auto' }} />
+                  </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>(พื้นที่สำหรับแสดง QR Code ของจริง)</p>
+                  
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <button className="btn" style={{ flex: 1 }} onClick={() => setShowQR(false)}>ยกเลิก</button>
+                    <button 
+                      className="btn active" 
+                      style={{ flex: 1 }} 
+                      onClick={handlePaymentConfirm}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'กำลังบันทึก...' : 'โอนเงินเรียบร้อยแล้ว'}
+                    </button>
+                  </div>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}
